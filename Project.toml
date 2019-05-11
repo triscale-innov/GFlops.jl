@@ -1,0 +1,11 @@
+name = "GFlops"
+uuid = "2ea8233c-34d4-5acc-88b4-02f326385bcc"
+authors = ["François Févotte <ff@triscale-innov.com>"]
+
+[deps]
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
