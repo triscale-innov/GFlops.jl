@@ -4,9 +4,9 @@ using BenchmarkTools:   @benchmark
 using InteractiveUtils: peakflops
 using Printf:           @printf
 
-export @gflops
+export @gflops, @count_ops
 
 include("float.jl")
-include("gflops.jl")
+include("count_ops.jl")
 
 end # module
