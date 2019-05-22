@@ -29,6 +29,6 @@ flop(c::Counter) = sum(getfield(c, field) for field in fieldnames(Counter))
 function Base.show(io::IO, c::Counter)
     println(io, "Flop Counter:")
     for field in fieldnames(Counter)
-        println(" $field: $(getfield(c, field))")
+        println(io, " $field: $(getfield(c, field))")
     end
 end

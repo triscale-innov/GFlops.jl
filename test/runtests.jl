@@ -32,6 +32,25 @@ end
 
 
 @testset "GFlops" begin
+    @testset "Counter" begin
+        let
+            cnt = GFlops.Counter()
+            iob = IOBuffer()
+            show(iob, cnt)
+            @test String(take!(iob)) == """
+Flop Counter:
+ add32: 0
+ sub32: 0
+ mul32: 0
+ div32: 0
+ add64: 0
+ sub64: 0
+ mul64: 0
+ div64: 0
+"""
+        end
+    end
+
     @testset "@count_ops" begin
         let
             N = 100
