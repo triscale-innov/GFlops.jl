@@ -9,24 +9,32 @@
 
 When code performance is an issue, it is sometimes useful to get absolute
 performance measurements in order to objectivise what is "slow" or
-"fast". `GFlops.jl` provides a way to automatically count the number of
-floating-point operations in a piece of code. When combined with the power of
-`BenchmarkTools`, this allows for easy and absolute performance measurements.
+"fast". `GFlops.jl` leverages the power of `Cassette.jl` to automatically count
+the number of floating-point operations in a piece of code. When combined with
+the accuracy of `BenchmarkTools`, this allows for easy and absolute performance
+measurements.
 
 ## Example use
 
 ```julia
 julia> using GFlops
 
-julia> using LinearAlgebra
-
 julia> x = rand(1000);
 
-julia> @count_ops dot($x, $x)
-2001
+julia> @count_ops sum($x)
+Flop Counter:
+ add32: 0
+ sub32: 0
+ mul32: 0
+ div32: 0
+ add64: 999
+ sub64: 0
+ mul64: 0
+ div64: 0
 
-julia> @gflops dot($x, $x);
-  16.17 GFlops,  34.84% peak  (2.00e+03 flop, 1.24e-07 s)
+
+julia> @gflops sum($x);
+  10.03 GFlops,  19.15% peak  (9.99e+02 flop, 9.96e-08 s)
 ```
 
 
@@ -44,3 +52,26 @@ order to `Pkg.add` it:
  Resolving package versions...
  [...]
 ```
+
+
+## Caveat
+
+`GFlops.jl` does not see what happens outside the realm of Julia code. It
+especially does not see operations performed in external libraries such as BLAS
+calls:
+```julia
+julia> using LinearAlgebra
+
+julia> @count_ops dot($x, $x)
+Flop Counter:
+ add32: 0
+ sub32: 0
+ mul32: 0
+ div32: 0
+ add64: 0
+ sub64: 0
+ mul64: 0
+ div64: 0
+```
+
+This is a known issue; we'll try and find a way to circumvent the problem.
