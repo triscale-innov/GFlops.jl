@@ -47,6 +47,8 @@ Flop Counter:
  sub64: 0
  mul64: 0
  div64: 0
+ sqrt32: 0
+ sqrt64: 0
 """
         end
     end
@@ -78,6 +80,16 @@ Flop Counter:
             @test cnt.add64 == N*N
             @test cnt.mul64 == N*N
             @test GFlops.flop(cnt) == 2*N*N
+        end
+
+        let cnt = @count_ops sqrt(4.2)
+            @test cnt.sqrt64 == 1
+            @test GFlops.flop(cnt) == 1
+        end
+
+        let cnt = @count_ops sqrt(4.2f0)
+            @test cnt.sqrt32 == 1
+            @test GFlops.flop(cnt) == 1
         end
     end
 

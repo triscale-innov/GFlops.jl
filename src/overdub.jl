@@ -2,7 +2,7 @@ using Cassette
 
 Cassette.@context CounterCtx;
 
-const ops = (
+const binops = (
     (:add32, Core.Intrinsics.add_float, Float32),
     (:sub32, Core.Intrinsics.sub_float, Float32),
     (:mul32, Core.Intrinsics.mul_float, Float32),
@@ -12,6 +12,13 @@ const ops = (
     (:mul64, Core.Intrinsics.mul_float, Float64),
     (:div64, Core.Intrinsics.div_float, Float64),
 )
+
+const unops = (
+    (:sqrt32, Core.Intrinsics.sqrt_llvm, Float32),
+    (:sqrt64, Core.Intrinsics.sqrt_llvm, Float64),
+)
+
+const ops = Iterators.flatten((binops, unops)) |> collect
 
 @eval mutable struct Counter
     $((:($(op[1]) ::Int) for op in ops)...)
@@ -24,7 +31,22 @@ for typ1 in (Float32, Float64)
                                     ::$typ1,
                                     ::$typ1)
         $(Expr(:block,
-               (map(ops) do (name, op, typ2)
+               (map(binops) do (name, op, typ2)
+                  typ1 == typ2 || return :nothing
+                  quote
+                    if op == $op
+                       ctx.metadata.$name += 1
+                       return
+                    end
+                  end
+                end)...))
+    end
+
+    @eval function Cassette.prehook(ctx::CounterCtx,
+                                    op::Core.IntrinsicFunction,
+                                    ::$typ1)
+        $(Expr(:block,
+               (map(unops) do (name, op, typ2)
                   typ1 == typ2 || return :nothing
                   quote
                     if op == $op
