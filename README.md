@@ -40,17 +40,10 @@ julia> @gflops sum($x);
 
 ## Installation
 
-This package is not (yet?) registered. You will have to specify its full URL in
-order to `Pkg.add` it:
+This package is registered and can therefore be simply be installed with
 
 ```julia
-(v1.1) pkg> add https://github.com/triscale-innov/GFlops.jl.git
-  Updating registry at `~/.julia/registries/General`
-  Updating git-repo `https://github.com/JuliaRegistries/General.git`
-   Cloning git-repo `https://github.com/triscale-innov/GFlops.jl.git`
-  Updating git-repo `https://github.com/triscale-innov/GFlops.jl.git`
- Resolving package versions...
- [...]
+pkg> add GFlops
 ```
 
 
