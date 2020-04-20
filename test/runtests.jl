@@ -54,42 +54,94 @@ Flop Counter:
     end
 
     @testset "@count_ops" begin
-        let
-            N = 100
-            a = 2.5
-            x = rand(N)
-            y = Vector{Float64}(undef, N)
+        @testset "mul+add 64" begin
+            let N = 100
+                a = 2.5
+                x = rand(N)
+                y = similar(x)
 
-            cnt = @count_ops my_axpy!(a, x, y)
-            @test cnt.add64 == 100
-            @test cnt.mul64 == 100
-            @test GFlops.flop(cnt) == 200
+                cnt = @count_ops my_axpy!(a, x, y)
+                @test cnt.add64 == N
+                @test cnt.mul64 == N
+                @test GFlops.flop(cnt) == 2*N
 
 
-            cnt = @count_ops my_axpy!(pi, $(rand(N)), y)
-            @test cnt.add64 == 100
-            @test cnt.mul64 == 100
-            @test GFlops.flop(cnt) == 200
+                m = rand(N, N)
+                v = rand(N)
+
+                cnt = @count_ops(my_prod(m, v))
+                @test cnt.add64 == N*N
+                @test cnt.mul64 == N*N
+                @test GFlops.flop(cnt) == 2*N*N
+            end
         end
 
-        let
-            N = 100
-            m = rand(N, N)
-            v = rand(N)
-            cnt = @count_ops(my_prod(m, v))
-            @test cnt.add64 == N*N
-            @test cnt.mul64 == N*N
-            @test GFlops.flop(cnt) == 2*N*N
+        @testset "mul+add 32" begin
+            let N = 100
+                a = 2.5f0
+                x = rand(Float32, N)
+                y = similar(x)
+
+                cnt = @count_ops my_axpy!(a, x, y)
+                @test cnt.add32 == N
+                @test cnt.mul32 == N
+                @test GFlops.flop(cnt) == 2*N
+
+
+                m = rand(Float32, N, N)
+                v = rand(Float32, N)
+
+                cnt = @count_ops(my_prod(m, v))
+                @test cnt.add32 == N*N
+                @test cnt.mul32 == N*N
+                @test GFlops.flop(cnt) == 2*N*N
+            end
         end
 
-        let cnt = @count_ops sqrt(4.2)
-            @test cnt.sqrt64 == 1
-            @test GFlops.flop(cnt) == 1
+        @testset "sqrt" begin
+            let cnt = @count_ops sqrt(4.2)
+                @test cnt.sqrt64 == 1
+                @test GFlops.flop(cnt) == 1
+            end
+
+            let cnt = @count_ops sqrt(4.2f0)
+                @test cnt.sqrt32 == 1
+                @test GFlops.flop(cnt) == 1
+            end
         end
 
-        let cnt = @count_ops sqrt(4.2f0)
-            @test cnt.sqrt32 == 1
-            @test GFlops.flop(cnt) == 1
+        @testset "interpolated arguments" begin
+            let N = 100
+
+                T = Float64
+                cnt = @count_ops my_axpy!(pi, $(rand(T, N)), $(rand(T, N)))
+                @test cnt.add64 == N
+                @test cnt.mul64 == N
+                @test GFlops.flop(cnt) == 2*N
+
+                T = Float32
+                cnt = @count_ops my_axpy!(pi, $(rand(T, N)), $(rand(T, N)))
+                @test cnt.add32 == N
+                @test cnt.mul32 == N
+                @test GFlops.flop(cnt) == 2*N
+            end
+        end
+
+        @testset "broadcast" begin
+            let N = 100
+
+                x = 42.0
+                cnt1 = @count_ops sin(x)
+                cnt2 = @count_ops sin.($(fill(x, N)))
+                @test GFlops.flop(cnt1) != 0
+                @test cnt2 == N*cnt1
+
+                x = 42.0f0
+                cnt1 = @count_ops sin(x)
+                cnt2 = @count_ops sin.($(fill(x, N)))
+                @test GFlops.flop(cnt1) != 0
+                @test cnt2 == N*cnt1
+            end
         end
     end
 

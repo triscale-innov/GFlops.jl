@@ -58,11 +58,28 @@ for typ1 in (Float32, Float64)
     end
 end
 
+
+# Relatively inefficient, but there should be no need for performance here...
+
 flop(c::Counter) = sum(getfield(c, field) for field in fieldnames(Counter))
+
+import Base: ==, *, show
 
 function Base.show(io::IO, c::Counter)
     println(io, "Flop Counter:")
     for field in fieldnames(Counter)
         println(io, " $field: $(getfield(c, field))")
     end
+end
+
+function ==(c1::Counter, c2::Counter)
+    all(getfield(c1, field)==getfield(c2, field) for field in fieldnames(Counter))
+end
+
+function *(n::Int, c::Counter)
+    ret = Counter()
+    for field in fieldnames(Counter)
+        setfield!(ret, field, n*getfield(c, field))
+    end
+    ret
 end
