@@ -83,7 +83,15 @@ end
 
 # Relatively inefficient, but there should be no need for performance here...
 
-flop(c::Counter) = sum(getfield(c, field) for field in fieldnames(Counter))
+function flop(c::Counter)
+    total = 2 * (c.fma32 + c.fma64)
+    total += c.add32 + c.add64
+    total += c.sub32 + c.sub64
+    total += c.div32 + c.div64
+    total += c.mul32 + c.mul64
+    total += c.sqrt32 + c.sqrt64
+    total
+end
 
 import Base: ==, *, show
 

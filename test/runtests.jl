@@ -115,12 +115,12 @@ Flop Counter:
         @testset "fma" begin
             let cnt = @count_ops fma(1.0, 2.0, 3.0)
                 @test cnt.fma64 == 1
-                @test GFlops.flop(cnt) == 1
+                @test GFlops.flop(cnt) == 2
             end
 
             let cnt = @count_ops fma(1.0f0, 2.0f0, 3.0f0)
                 @test cnt.fma32 == 1
-                @test GFlops.flop(cnt) == 1
+                @test GFlops.flop(cnt) == 2
             end
         end
 
