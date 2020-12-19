@@ -39,6 +39,8 @@ end
             show(iob, cnt)
             @test String(take!(iob)) == """
 Flop Counter:
+ fma32: 0
+ fma64: 0
  add32: 0
  sub32: 0
  mul32: 0
@@ -107,6 +109,18 @@ Flop Counter:
             let cnt = @count_ops sqrt(4.2f0)
                 @test cnt.sqrt32 == 1
                 @test GFlops.flop(cnt) == 1
+            end
+        end
+
+        @testset "fma" begin
+            let cnt = @count_ops fma(1.0, 2.0, 3.0)
+                @test cnt.fma64 == 1
+                @test GFlops.flop(cnt) == 2
+            end
+
+            let cnt = @count_ops fma(1.0f0, 2.0f0, 3.0f0)
+                @test cnt.fma32 == 1
+                @test GFlops.flop(cnt) == 2
             end
         end
 
