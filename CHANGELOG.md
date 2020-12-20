@@ -4,6 +4,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 
 
+## [UNRELEASED]
+
+### Changed
+
+- Quality Assurance:
+  - CI: finish the switch from Travis to GitHub Actions
+
+
+
 ## [0.1.2] - 2020-12-20
 
 ### Added
