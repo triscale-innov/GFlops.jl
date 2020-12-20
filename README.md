@@ -25,6 +25,8 @@ julia> x = rand(1000);
 
 julia> @count_ops sum($x)
 Flop Counter:
+ fma32: 0
+ fma64: 0
  add32: 0
  sub32: 0
  mul32: 0
@@ -33,10 +35,11 @@ Flop Counter:
  sub64: 0
  mul64: 0
  div64: 0
-
+ sqrt32: 0
+ sqrt64: 0
 
 julia> @gflops sum($x);
-  10.03 GFlops,  19.15% peak  (9.99e+02 flop, 9.96e-08 s)
+  10.03 GFlops,  19.15% peak  (9.99e+02 flop, 9.96e-08 s, 0 alloc: 0 bytes)
 ```
 
 

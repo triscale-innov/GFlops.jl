@@ -23,10 +23,14 @@ end
 import BenchmarkTools: @benchmark
 struct FakeResults
     times
+    allocs
+    memory
 end
 macro benchmark(e)
     quote
-        FakeResults([2.0])
+        FakeResults(#= times  =# [2.0, 3.0],
+                    #= allocs =# 1,
+                    #= memory =# 1042)
     end
 end
 
