@@ -1,5 +1,6 @@
 module GFlops
 import Statistics
+import BenchmarkTools
 using BenchmarkTools:   @benchmark
 using InteractiveUtils: peakflops
 using Printf:           @printf

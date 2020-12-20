@@ -42,13 +42,15 @@ macro gflops(funcall)
     quote
         let
             b = @benchmark $funcall
-            ns = Statistics.mean(b.times)
+            ns = minimum(b.times)
 
             cnt = flop($(count_ops(funcall)))
             gflops = cnt/ns
             peakfraction = 1e9*gflops / peakflops()
-            @printf("  %.2f GFlops,  %.2f%% peak  (%.2e flop, %.2e s)\n",
-                    gflops, peakfraction*100,  cnt, ns*1e-9)
+            memory = $(GFlops.BenchmarkTools).prettymemory(b.memory)
+            @printf("  %.2f GFlops,  %.2f%% peak  (%.2e flop, %.2e s, %d alloc: %s)\n",
+                    gflops, peakfraction*100,  cnt, ns*1e-9,
+                    b.allocs, memory)
             gflops
         end
     end
