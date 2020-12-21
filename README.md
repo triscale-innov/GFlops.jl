@@ -25,18 +25,16 @@ julia> x = rand(1000);
 
 julia> @count_ops sum($x)
 Flop Counter:
- fma32: 0
- fma64: 0
- add32: 0
- sub32: 0
- mul32: 0
- div32: 0
- add64: 999
- sub64: 0
- mul64: 0
- div64: 0
- sqrt32: 0
- sqrt64: 0
+┌──────┬─────────┬─────────┐
+│      │ Float32 │ Float64 │
+├──────┼─────────┼─────────┤
+│  fma │       0 │       0 │
+│  add │       0 │     999 │
+│  sub │       0 │       0 │
+│  mul │       0 │       0 │
+│  div │       0 │       0 │
+│ sqrt │       0 │       0 │
+└──────┴─────────┴─────────┘
 
 julia> @gflops sum($x);
   10.03 GFlops,  19.15% peak  (9.99e+02 flop, 9.96e-08 s, 0 alloc: 0 bytes)
@@ -78,18 +76,16 @@ julia> x = rand(100); y = rand(100);
 # 100 FMAs...
 julia> cnt = @count_ops my_dot(x, y)
 Flop Counter:
- fma32: 0
- fma64: 100
- add32: 0
- sub32: 0
- mul32: 0
- div32: 0
- add64: 0
- sub64: 0
- mul64: 0
- div64: 0
- sqrt32: 0
- sqrt64: 0
+┌──────┬─────────┬─────────┐
+│      │ Float32 │ Float64 │
+├──────┼─────────┼─────────┤
+│  fma │       0 │     100 │
+│  add │       0 │       0 │
+│  sub │       0 │       0 │
+│  mul │       0 │       0 │
+│  div │       0 │       0 │
+│ sqrt │       0 │       0 │
+└──────┴─────────┴─────────┘
 
 # ...but 200 FLOPs
 julia> GFlops.flop(cnt)
@@ -106,14 +102,16 @@ julia> using LinearAlgebra
 
 julia> @count_ops dot($x, $x)
 Flop Counter:
- add32: 0
- sub32: 0
- mul32: 0
- div32: 0
- add64: 0
- sub64: 0
- mul64: 0
- div64: 0
+┌──────┬─────────┬─────────┐
+│      │ Float32 │ Float64 │
+├──────┼─────────┼─────────┤
+│  fma │       0 │       0 │
+│  add │       0 │       0 │
+│  sub │       0 │       0 │
+│  mul │       0 │       0 │
+│  div │       0 │       0 │
+│ sqrt │       0 │       0 │
+└──────┴─────────┴─────────┘
 ```
 
 This is a known issue; we'll try and find a way to circumvent the problem.

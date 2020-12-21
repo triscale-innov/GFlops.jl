@@ -3,80 +3,68 @@ using Cassette
 Cassette.@context CounterCtx;
 
 const ternops = (
-    (:fma32, Core.Intrinsics.fma_float, Float32),
-    (:fma64, Core.Intrinsics.fma_float, Float64),
+    (:fma, Core.Intrinsics.fma_float, 2), # 2 flops per FMA instruction
 )
 
 const binops = (
-    (:add32, Core.Intrinsics.add_float, Float32),
-    (:sub32, Core.Intrinsics.sub_float, Float32),
-    (:mul32, Core.Intrinsics.mul_float, Float32),
-    (:div32, Core.Intrinsics.div_float, Float32),
-    (:add64, Core.Intrinsics.add_float, Float64),
-    (:sub64, Core.Intrinsics.sub_float, Float64),
-    (:mul64, Core.Intrinsics.mul_float, Float64),
-    (:div64, Core.Intrinsics.div_float, Float64),
+    (:add, Core.Intrinsics.add_float, 1),
+    (:sub, Core.Intrinsics.sub_float, 1),
+    (:mul, Core.Intrinsics.mul_float, 1),
+    (:div, Core.Intrinsics.div_float, 1),
 )
 
 const unops = (
-    (:sqrt32, Core.Intrinsics.sqrt_llvm, Float32),
-    (:sqrt64, Core.Intrinsics.sqrt_llvm, Float64),
+    (:sqrt, Core.Intrinsics.sqrt_llvm, 1),
 )
 
 const ops = Iterators.flatten((ternops, binops, unops)) |> collect
 
+const typs = (
+    (Float32, :32),
+    (Float64, :64),
+)
+
+
 @eval mutable struct Counter
-    $((:($(op[1]) ::Int) for op in ops)...)
-    Counter() = new($((0 for _ in 1:length(ops))...))
+    $((:($(Symbol(op[1], typ[2])) ::Int) for op in ops for typ in typs)...)
+    Counter() = new($((0 for _ in 1:length(ops)*length(typs))...))
 end
 
-for typ1 in (Float32, Float64)
+function gen_count(ops, suffix)
+    body = Expr(:block)
+    for (name, op) in ops
+        fieldname = Symbol(name, suffix)
+        e = quote
+            if op == $op
+                ctx.metadata.$fieldname += 1
+                return
+            end
+        end
+        push!(body.args, e)
+    end
+    body
+end
+
+for (typ, suffix) in typs
     @eval function Cassette.prehook(ctx::CounterCtx,
                                     op::Core.IntrinsicFunction,
-                                    ::$typ1,
-                                    ::$typ1,
-                                    ::$typ1)
-        $(Expr(:block,
-               (map(ternops) do (name, op, typ2)
-                  typ1 == typ2 || return :nothing
-                  quote
-                    if op == $op
-                       ctx.metadata.$name += 1
-                       return
-                    end
-                  end
-                end)...))
+                                    ::$typ,
+                                    ::$typ,
+                                    ::$typ)
+        $(gen_count(ternops, suffix))
     end
 
     @eval function Cassette.prehook(ctx::CounterCtx,
                                     op::Core.IntrinsicFunction,
-                                    ::$typ1,
-                                    ::$typ1)
-        $(Expr(:block,
-               (map(binops) do (name, op, typ2)
-                  typ1 == typ2 || return :nothing
-                  quote
-                    if op == $op
-                       ctx.metadata.$name += 1
-                       return
-                    end
-                  end
-                end)...))
+                                    ::$typ,
+                                    ::$typ)
+        $(gen_count(binops, suffix))
     end
 
     @eval function Cassette.prehook(ctx::CounterCtx,
                                     op::Core.IntrinsicFunction,
-                                    ::$typ1)
-        $(Expr(:block,
-               (map(unops) do (name, op, typ2)
-                  typ1 == typ2 || return :nothing
-                  quote
-                    if op == $op
-                       ctx.metadata.$name += 1
-                       return
-                    end
-                  end
-                end)...))
+                                    ::$typ)
+        $(gen_count(unops, suffix))
     end
 end
 
@@ -84,12 +72,13 @@ end
 # Relatively inefficient, but there should be no need for performance here...
 
 function flop(c::Counter)
-    total = 2 * (c.fma32 + c.fma64)
-    total += c.add32 + c.add64
-    total += c.sub32 + c.sub64
-    total += c.div32 + c.div64
-    total += c.mul32 + c.mul64
-    total += c.sqrt32 + c.sqrt64
+    total = 0
+    for (typ, suffix) in typs
+        for (name, op, cnt) in ops
+            fieldname = Symbol(name, suffix)
+            total += cnt * getfield(c, fieldname)
+        end
+    end
     total
 end
 
@@ -97,9 +86,15 @@ import Base: ==, *, show
 
 function Base.show(io::IO, c::Counter)
     println(io, "Flop Counter:")
-    for field in fieldnames(Counter)
-        println(io, " $field: $(getfield(c, field))")
-    end
+    type_names  = [typ    for (typ, _)    in typs]
+    type_suffix = [suffix for (_, suffix) in typs]
+    op_names    = [name   for (name, _)   in ops]
+
+    mat = [getfield(c, Symbol(name, suffix)) for
+           name   in op_names,
+           suffix in type_suffix]
+    pretty_table(io, mat, type_names,
+                 row_names = op_names)
 end
 
 function ==(c1::Counter, c2::Counter)

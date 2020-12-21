@@ -11,10 +11,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Quality Assurance:
   - CI: finish the switch from Travis to GitHub Actions
   - TagBot: switch to issue comment triggers
-
 - Display memory allocs in `@gflops` output (#5)
-
 - Estimate GFlops based on the minimum time measurement provided by `@btime` (#15)
+- Flop Counters are now displayed in a pretty-printed table
 
 
 

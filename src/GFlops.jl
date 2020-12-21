@@ -4,6 +4,7 @@ import BenchmarkTools
 using BenchmarkTools:   @benchmark
 using InteractiveUtils: peakflops
 using Printf:           @printf
+using PrettyTables:     pretty_table
 
 export @gflops, @count_ops
 
