@@ -85,7 +85,6 @@ end
 import Base: ==, *, show
 
 function Base.show(io::IO, c::Counter)
-    println(io, "Flop Counter:")
     type_names  = [typ    for (typ, _)    in typs]
     type_suffix = [suffix for (_, suffix) in typs]
     op_names    = [name   for (name, _)   in ops]
@@ -93,8 +92,20 @@ function Base.show(io::IO, c::Counter)
     mat = [getfield(c, Symbol(name, suffix)) for
            name   in op_names,
            suffix in type_suffix]
+
+    if flop(c) == 0
+        print(io, "Flop Counter: no flop detected")
+        return
+    end
+
+    println(io, "Flop Counter:")
+    fc(data, i) = any(data[:,i] .> 0)
+    fr(data, i) = any(data[i,:] .> 0)
     pretty_table(io, mat, type_names,
-                 row_names = op_names)
+                 row_names = op_names,
+                 filters_col = (fc,),
+                 filters_row = (fr,),
+                 newline_at_end = false)
 end
 
 function ==(c1::Counter, c2::Counter)
