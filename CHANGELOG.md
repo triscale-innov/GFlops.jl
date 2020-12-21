@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Quality Assurance:
   - CI: finish the switch from Travis to GitHub Actions
+  - TagBot: switch to issue comment triggers
 
 - Display memory allocs in `@gflops` output (#5)
 
