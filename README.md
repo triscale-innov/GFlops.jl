@@ -16,32 +16,6 @@ the number of floating-point operations in a piece of code. When combined with
 the accuracy of `BenchmarkTools`, this allows for easy and absolute performance
 measurements.
 
-## Example use
-
-```julia
-julia> using GFlops
-
-julia> x = rand(1000);
-
-julia> @count_ops sum($x)
-Flop Counter:
- fma32: 0
- fma64: 0
- add32: 0
- sub32: 0
- mul32: 0
- div32: 0
- add64: 999
- sub64: 0
- mul64: 0
- div64: 0
- sqrt32: 0
- sqrt64: 0
-
-julia> @gflops sum($x);
-  10.03 GFlops,  19.15% peak  (9.99e+02 flop, 9.96e-08 s, 0 alloc: 0 bytes)
-```
-
 
 ## Installation
 
@@ -49,6 +23,63 @@ This package is registered and can therefore be simply be installed with
 
 ```julia
 pkg> add GFlops
+```
+
+
+## Example use
+
+This simple example shows how to track the number of operations in a vector summation:
+```julia
+julia> using GFlops
+
+julia> x = rand(1000);
+
+julia> @count_ops sum($x)
+Flop Counter:
+┌─────┬─────────┐
+│     │ Float64 │
+├─────┼─────────┤
+│ add │     999 │
+└─────┴─────────┘
+
+julia> @gflops sum($x);
+  8.86 GFlops,  12.76% peak  (9.99e+02 flop, 1.13e-07 s, 0 alloc: 0 bytes)
+```
+
+<br/>
+
+`GFlops.jl` internally tracks several types of Floating-Point operations, for
+both 32-bit and 64-bit operands. Pretty-printing a Flop Counter only
+shows non-zero entries, but any individual counter can be accessed:
+```julia
+julia> function mixed_dot(x, y)
+           acc = 0.0
+           @inbounds @simd for i in eachindex(x, y)
+               acc += x[i] * y[i]
+           end
+           acc
+       end
+mixed_dot (generic function with 1 method)
+
+julia> x = rand(Float32, 1000); y = rand(Float32, 1000);
+
+julia> cnt = @count_ops mixed_dot($x, $y)
+Flop Counter:
+┌─────┬─────────┬─────────┐
+│     │ Float32 │ Float64 │
+├─────┼─────────┼─────────┤
+│ add │       0 │    1000 │
+│ mul │    1000 │       0 │
+└─────┴─────────┴─────────┘
+
+julia> fieldnames(GFlops.Counter)
+(:fma32, :fma64, :add32, :add64, :sub32, :sub64, :mul32, :mul64, :div32, :div64, :sqrt32, :sqrt64)
+
+julia> cnt.add64
+1000
+
+julia> @gflops mixed_dot($x, $y);
+  9.91 GFlops,  13.36% peak  (2.00e+03 flop, 2.02e-07 s, 0 alloc: 0 bytes)
 ```
 
 
@@ -64,36 +95,32 @@ operations for each FMA, in accordance to the way high-performance benchmarks
 usually behave:
 
 ```julia
-julia> function my_dot(x, y)
+julia> function fma_dot(x, y)
            acc = zero(eltype(x))
            @inbounds for i in eachindex(x, y)
                acc = fma(x[i], y[i], acc)
            end
            acc
        end
-my_dot (generic function with 1 method)
+fma_dot (generic function with 1 method)
 
 julia> x = rand(100); y = rand(100);
 
 # 100 FMAs...
-julia> cnt = @count_ops my_dot(x, y)
+julia> cnt = @count_ops fma_dot($x, $y)
 Flop Counter:
- fma32: 0
- fma64: 100
- add32: 0
- sub32: 0
- mul32: 0
- div32: 0
- add64: 0
- sub64: 0
- mul64: 0
- div64: 0
- sqrt32: 0
- sqrt64: 0
+┌─────┬─────────┐
+│     │ Float64 │
+├─────┼─────────┤
+│ fma │     100 │
+└─────┴─────────┘
 
 # ...but 200 FLOPs
 julia> GFlops.flop(cnt)
 200
+
+julia> @gflops fma_dot($x, $y);
+  1.58 GFlops,  2.12% peak  (2.00e+02 flop, 1.27e-07 s, 0 alloc: 0 bytes)
 ```
 
 ### Non-julia code
@@ -101,19 +128,12 @@ julia> GFlops.flop(cnt)
 `GFlops.jl` does not see what happens outside the realm of Julia code. It
 especially does not see operations performed in external libraries such as BLAS
 calls:
+
 ```julia
 julia> using LinearAlgebra
 
-julia> @count_ops dot($x, $x)
-Flop Counter:
- add32: 0
- sub32: 0
- mul32: 0
- div32: 0
- add64: 0
- sub64: 0
- mul64: 0
- div64: 0
+julia> @count_ops dot($x, $y)
+Flop Counter: no flop detected
 ```
 
 This is a known issue; we'll try and find a way to circumvent the problem.

@@ -35,27 +35,28 @@ macro benchmark(e)
 end
 
 
+
 @testset "GFlops" begin
     @testset "Counter" begin
-        let
-            cnt = GFlops.Counter()
-            iob = IOBuffer()
-            show(iob, cnt)
-            @test String(take!(iob)) == """
-Flop Counter:
- fma32: 0
- fma64: 0
- add32: 0
- sub32: 0
- mul32: 0
- div32: 0
- add64: 0
- sub64: 0
- mul64: 0
- div64: 0
- sqrt32: 0
- sqrt64: 0
-"""
+        @testset "display empty" begin
+            let
+                cnt = GFlops.Counter()
+                str = string(cnt)
+                @test str == "Flop Counter: no flop detected"
+            end
+        end
+
+        @testset "display non-empty" begin
+            let
+                cnt = GFlops.Counter()
+                cnt.add32 = 1
+                str = string(cnt)
+                @test  occursin("Float32", str)
+                @test !occursin("Float64", str)
+                @test  occursin("add",     str)
+                @test !occursin("mul",     str)
+                @test  occursin(" 1 ",     str)
+            end
         end
     end
 
