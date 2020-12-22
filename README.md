@@ -35,7 +35,7 @@ julia> using GFlops
 julia> x = rand(1000);
 
 julia> @count_ops sum($x)
-Flop Counter:
+Flop Counter: 999 flop
 ┌─────┬─────────┐
 │     │ Float64 │
 ├─────┼─────────┤
@@ -64,7 +64,7 @@ mixed_dot (generic function with 1 method)
 julia> x = rand(Float32, 1000); y = rand(Float32, 1000);
 
 julia> cnt = @count_ops mixed_dot($x, $y)
-Flop Counter:
+Flop Counter: 1000 flop
 ┌─────┬─────────┬─────────┐
 │     │ Float32 │ Float64 │
 ├─────┼─────────┼─────────┤
@@ -106,18 +106,14 @@ fma_dot (generic function with 1 method)
 
 julia> x = rand(100); y = rand(100);
 
-# 100 FMAs...
+# 100 FMAs but 200 flop
 julia> cnt = @count_ops fma_dot($x, $y)
-Flop Counter:
+Flop Counter: 200 flop
 ┌─────┬─────────┐
 │     │ Float64 │
 ├─────┼─────────┤
 │ fma │     100 │
 └─────┴─────────┘
-
-# ...but 200 FLOPs
-julia> GFlops.flop(cnt)
-200
 
 julia> @gflops fma_dot($x, $y);
   1.58 GFlops,  2.12% peak  (2.00e+02 flop, 1.27e-07 s, 0 alloc: 0 bytes)
@@ -133,7 +129,7 @@ calls:
 julia> using LinearAlgebra
 
 julia> @count_ops dot($x, $y)
-Flop Counter: no flop detected
+Flop Counter: 0 flop
 ```
 
 This is a known issue; we'll try and find a way to circumvent the problem.

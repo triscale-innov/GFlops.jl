@@ -30,10 +30,8 @@ function fma_dot(x, y)
     acc
 end
 x = rand(100); y = rand(100);
-println("# 100 FMAs...")
+println("# 100 FMAs but 200 flop")
 cnt = @count_ops fma_dot($x, $y)
-println("# ...but 200 FLOPs")
-GFlops.flop(cnt)
 @gflops fma_dot($x, $y);
 
 

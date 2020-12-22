@@ -42,7 +42,7 @@ end
             let
                 cnt = GFlops.Counter()
                 str = string(cnt)
-                @test str == "Flop Counter: no flop detected"
+                @test str == "Flop Counter: 0 flop"
             end
         end
 
