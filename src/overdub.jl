@@ -4,6 +4,7 @@ Cassette.@context CounterCtx;
 
 const ternops = (
     (:fma, Core.Intrinsics.fma_float, 2), # 2 flops per FMA instruction
+    (:muladd, Core.Intrinsics.muladd_float, 2), # 2 flops per muladd instruction
 )
 
 const binops = (
@@ -11,9 +12,12 @@ const binops = (
     (:sub, Core.Intrinsics.sub_float, 1),
     (:mul, Core.Intrinsics.mul_float, 1),
     (:div, Core.Intrinsics.div_float, 1),
+    (:rem, Core.Intrinsics.rem_float, 1),
 )
 
 const unops = (
+    (:abs, Core.Intrinsics.abs_float, 1),
+    (:neg, Core.Intrinsics.neg_float, 1),
     (:sqrt, Core.Intrinsics.sqrt_llvm, 1),
 )
 
