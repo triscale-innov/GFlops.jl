@@ -112,7 +112,7 @@ end
             end
 
             let cnt = @count_ops -(4.2f0)
-                @test cnt.sqrt32 == 1
+                @test cnt.neg32 == 1
                 @test GFlops.flop(cnt) == 1
             end
         end
