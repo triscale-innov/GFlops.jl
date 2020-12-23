@@ -73,7 +73,7 @@ Flop Counter: 1000 flop
 └─────┴─────────┴─────────┘
 
 julia> fieldnames(GFlops.Counter)
-(:fma32, :fma64, :add32, :add64, :sub32, :sub64, :mul32, :mul64, :div32, :div64, :sqrt32, :sqrt64)
+(:fma32, :fma64, :muladd32, :muladd64, :add32, :add64, :sub32, ...)
 
 julia> cnt.add64
 1000
@@ -85,38 +85,28 @@ julia> @gflops mixed_dot($x, $y);
 
 ## Caveats
 
-### FMA - Fused Multiplication and Addition
+### Fused Multiplication and Addition: FMA & MulAdd
 
-On systems which support them, FMAs compute two operations (an addition and a
-multiplication) in one instruction. `@count_ops` counts each individual FMA as
-one operation, which makes it easier to interpret counters. However, `@gflops`
-(and the internal `GFlops.flops` function) will count two floating-point
-operations for each FMA, in accordance to the way high-performance benchmarks
-usually behave:
+On systems which support them, FMAs and MulAdds compute two operations (an
+addition and a multiplication) in one instruction. `@count_ops` counts each
+individual FMA/MulAdd as one operation, which makes it easier to interpret
+counters. However, `@gflops` will count two floating-point operations for each
+FMA, in accordance to the way high-performance benchmarks usually behave:
 
 ```julia
-julia> function fma_dot(x, y)
-           acc = zero(eltype(x))
-           @inbounds for i in eachindex(x, y)
-               acc = fma(x[i], y[i], acc)
-           end
-           acc
-       end
-fma_dot (generic function with 1 method)
+julia> x = 0.5; coeffs = rand(10);
 
-julia> x = rand(100); y = rand(100);
+# 9 MulAdds but 18 flop
+julia> cnt = @count_ops evalpoly($x, $coeffs)
+Flop Counter: 18 flop
+┌────────┬─────────┐
+│        │ Float64 │
+├────────┼─────────┤
+│ muladd │       9 │
+└────────┴─────────┘
 
-# 100 FMAs but 200 flop
-julia> cnt = @count_ops fma_dot($x, $y)
-Flop Counter: 200 flop
-┌─────┬─────────┐
-│     │ Float64 │
-├─────┼─────────┤
-│ fma │     100 │
-└─────┴─────────┘
-
-julia> @gflops fma_dot($x, $y);
-  1.58 GFlops,  2.12% peak  (2.00e+02 flop, 1.27e-07 s, 0 alloc: 0 bytes)
+julia> @gflops evalpoly($x, $coeffs);
+  0.87 GFlops,  1.63% peak  (1.80e+01 flop, 2.06e-08 s, 0 alloc: 0 bytes)
 ```
 
 ### Non-julia code

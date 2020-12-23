@@ -105,6 +105,30 @@ end
             end
         end
 
+        @testset "neg" begin
+            let cnt = @count_ops -(4.2)
+                @test cnt.neg64 == 1
+                @test GFlops.flop(cnt) == 1
+            end
+
+            let cnt = @count_ops -(4.2f0)
+                @test cnt.neg32 == 1
+                @test GFlops.flop(cnt) == 1
+            end
+        end
+
+        @testset "abs" begin
+            let cnt = @count_ops abs(-4.2)
+                @test cnt.abs64 == 1
+                @test GFlops.flop(cnt) == 1
+            end
+
+            let cnt = @count_ops abs(-4.2f0)
+                @test cnt.abs32 == 1
+                @test GFlops.flop(cnt) == 1
+            end
+        end
+        
         @testset "sqrt" begin
             let cnt = @count_ops sqrt(4.2)
                 @test cnt.sqrt64 == 1
@@ -117,6 +141,18 @@ end
             end
         end
 
+        @testset "rem" begin
+            let cnt = @count_ops rem(12.0, 5.0)
+                @test cnt.rem64 == 1
+                @test GFlops.flop(cnt) == 1
+            end
+
+            let cnt = @count_ops rem(12.0f0, 5.0f0)
+                @test cnt.rem32 == 1
+                @test GFlops.flop(cnt) == 1
+            end
+        end
+
         @testset "fma" begin
             let cnt = @count_ops fma(1.0, 2.0, 3.0)
                 @test cnt.fma64 == 1
@@ -125,6 +161,18 @@ end
 
             let cnt = @count_ops fma(1.0f0, 2.0f0, 3.0f0)
                 @test cnt.fma32 == 1
+                @test GFlops.flop(cnt) == 2
+            end
+        end
+
+        @testset "muladd" begin
+            let cnt = @count_ops muladd(1.0, 2.0, 3.0)
+                @test cnt.muladd64 == 1
+                @test GFlops.flop(cnt) == 2
+            end
+
+            let cnt = @count_ops muladd(1.0f0, 2.0f0, 3.0f0)
+                @test cnt.muladd32 == 1
                 @test GFlops.flop(cnt) == 2
             end
         end

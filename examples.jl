@@ -22,19 +22,13 @@ cnt.add64
 
 
 
-function fma_dot(x, y)
-    acc = zero(eltype(x))
-    @inbounds for i in eachindex(x, y)
-        acc = fma(x[i], y[i], acc)
-    end
-    acc
-end
-x = rand(100); y = rand(100);
-println("# 100 FMAs but 200 flop")
-cnt = @count_ops fma_dot($x, $y)
-@gflops fma_dot($x, $y);
+x = 0.5; coeffs = rand(10);
+println("# 9 MulAdds but 18 flop")
+cnt = @count_ops evalpoly($x, $coeffs)
+@gflops evalpoly($x, $coeffs);
 
 
 
 using LinearAlgebra
+x = rand(1000);
 @count_ops dot($x, $y)
