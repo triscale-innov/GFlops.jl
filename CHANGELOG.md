@@ -4,6 +4,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 
 
+## [Unreleased]
+
+### Added
+
+- Support for additional operations: `neg`, `abs`, `rem`, `muladd`
+
+
+
 ## [0.1.3] - 2020-12-23
 
 ### Changed
