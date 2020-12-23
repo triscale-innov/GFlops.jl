@@ -144,7 +144,7 @@ end
         @testset "rem" begin
             let cnt = @count_ops rem(12.0, 5.0)
                 @test cnt.rem64 == 1
-                @test GFlops.flop(rem) == 1
+                @test GFlops.flop(cnt) == 1
             end
 
             let cnt = @count_ops rem(12.0f0, 5.0f0)
