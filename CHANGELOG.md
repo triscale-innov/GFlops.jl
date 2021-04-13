@@ -10,6 +10,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Support for additional operations: `neg`, `abs`, `rem`, `muladd`
 
+### Changed
+
+- Fix CI issues
+- Compatibility with `CompatBounds.jl` 0.12
+
 
 
 ## [0.1.3] - 2020-12-23

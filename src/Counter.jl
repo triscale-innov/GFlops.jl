@@ -34,7 +34,8 @@ function Base.show(io::IO, c::Counter)
     print(io, "\n")
     fc(data, i) = any(data[:,i] .> 0)
     fr(data, i) = any(data[i,:] .> 0)
-    pretty_table(io, mat, type_names,
+    pretty_table(io, mat,
+                 header = type_names,
                  row_names = op_names,
                  filters_col = (fc,),
                  filters_row = (fr,),
