@@ -4,16 +4,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 
 
-## [Unreleased]
+## [0.1.4] - 2021-04-13
 
 ### Added
 
-- Support for additional operations: `neg`, `abs`, `rem`, `muladd`
+- Support for additional operations: `neg`, `abs`, `rem`, `muladd` (#21)
 
 ### Changed
 
-- Fix CI issues
-- Compatibility with `CompatBounds.jl` 0.12
+- Fix CI issues (#22)
+- Compatibility with `CompatBounds.jl` 0.12 (#29)
 
 
 
