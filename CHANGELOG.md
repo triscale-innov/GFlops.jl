@@ -2,6 +2,14 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.5] - 2021-04-19
+
+This is a bugfix release.
+
+### Changed
+
+- Fix hygiene-related bug with Julia 1.6.0 (#32, #33)
+
 
 
 ## [0.1.4] - 2021-04-13
@@ -13,7 +21,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - Fix CI issues (#22)
-- Compatibility with `CompatBounds.jl` 0.12 (#29)
+- Compatibility with `PrettyTables.jl` 0.12 (#29)
 
 
 

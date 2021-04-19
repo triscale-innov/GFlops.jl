@@ -20,21 +20,9 @@ function my_prod(m, v)
     res
 end
 
-import BenchmarkTools: @benchmark
-struct FakeResults
-    times
-    allocs
-    memory
-end
-macro benchmark(e)
-    quote
-        FakeResults(#= times  =# [2.0, 3.0],
-                    #= allocs =# 1,
-                    #= memory =# 1042)
-    end
-end
-
-
+# Fake benchmarked times
+import BenchmarkTools
+GFlops.times(::BenchmarkTools.Trial) = [2.0, 3.0]
 
 @testset "GFlops" begin
     @testset "Counter" begin
@@ -128,7 +116,7 @@ end
                 @test GFlops.flop(cnt) == 1
             end
         end
-        
+
         @testset "sqrt" begin
             let cnt = @count_ops sqrt(4.2)
                 @test cnt.sqrt64 == 1
@@ -219,15 +207,15 @@ end
             x = rand(N)
             y = Vector{Float64}(undef, N)
 
-            @test @gflops(my_axpy!(a, x, y))          == N
-            @test @gflops(my_axpy!(π, $(rand(N)), y)) == N
+            @test @gflops(my_axpy!($a, $x, $y))         == N
+            @test @gflops(my_axpy!($π, $(rand(N)), $y)) == N
         end
 
         let
             N = 100
             m = rand(N, N)
             v = rand(N)
-            @test @gflops(my_prod(m, v)) == N*N
+            @test @gflops(my_prod($m, $v)) == N*N
         end
     end
 end
