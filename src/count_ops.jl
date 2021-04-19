@@ -37,19 +37,25 @@ end
 
 
 
+# Helper accessor (that can be overriden to fake benchmarking times in tests)
+times(t::BenchmarkTools.Trial) = t.times
 
 macro gflops(funcall)
+    benchmark = quote
+        $BenchmarkTools.@benchmark $funcall
+    end
+
     quote
         let
-            b = @benchmark $funcall
-            ns = minimum(b.times)
+            b = $(esc(benchmark))
+            ns = minimum(times(b))
 
             cnt = flop($(count_ops(funcall)))
-            gflops = cnt/ns
-            peakfraction = 1e9*gflops / peakflops()
-            memory = $(GFlops.BenchmarkTools).prettymemory(b.memory)
+            gflops = cnt / ns
+            peakfraction = 1e9 * gflops / peakflops()
+            memory = $BenchmarkTools.prettymemory(b.memory)
             @printf("  %.2f GFlops,  %.2f%% peak  (%.2e flop, %.2e s, %d alloc: %s)\n",
-                    gflops, peakfraction*100,  cnt, ns*1e-9,
+                    gflops, peakfraction*100, cnt, ns*1e-9,
                     b.allocs, memory)
             gflops
         end
