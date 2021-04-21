@@ -2,6 +2,16 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.1.6] - Unreleased
+
+### Changed
+
+- Updated CompatHelper setup
+- Updated compatibility bounds (#34)
+
+
+
 ## [0.1.5] - 2021-04-19
 
 This is a bugfix release.
