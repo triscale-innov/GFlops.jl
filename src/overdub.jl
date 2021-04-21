@@ -24,6 +24,7 @@ const unops = (
 const ops = Iterators.flatten((ternops, binops, unops)) |> collect
 
 const typs = (
+    (Float16, :16),
     (Float32, :32),
     (Float64, :64),
 )
