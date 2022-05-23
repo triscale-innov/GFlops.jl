@@ -5,10 +5,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [0.1.6] - Unreleased
 
+### Added
+
+- Support half precision (Float16). Many thanks to milankl (#31)
+
 ### Changed
 
 - Updated CompatHelper setup
-- Updated compatibility bounds (#34)
+- Updated compatibility bounds (#34, #36)
 
 
 

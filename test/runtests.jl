@@ -93,6 +93,28 @@ GFlops.times(::BenchmarkTools.Trial) = [2.0, 3.0]
             end
         end
 
+        @testset "mul+add 16" begin
+            let N = 100
+                a = Float16(2.5)
+                x = rand(Float16, N)
+                y = similar(x)
+
+                cnt = @count_ops my_axpy!(a, x, y)
+                @test cnt.add16 == N
+                @test cnt.mul16 == N
+                @test GFlops.flop(cnt) == 2*N
+
+
+                m = rand(Float16, N, N)
+                v = rand(Float16, N)
+
+                cnt = @count_ops(my_prod(m, v))
+                @test cnt.add16 == N*N
+                @test cnt.mul16 == N*N
+                @test GFlops.flop(cnt) == 2*N*N
+            end
+        end
+
         @testset "neg" begin
             let cnt = @count_ops -(4.2)
                 @test cnt.neg64 == 1
