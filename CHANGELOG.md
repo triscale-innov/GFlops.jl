@@ -3,11 +3,15 @@
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.1.7] - UNRELEASED
+
+
+
 ## [0.1.6] - 2022-05-23
 
 ### Added
 
-- Support half precision (Float16). Many thanks to milankl (#31)
+- Support half precision (Float16). Many thanks to milankl (#31, #39)
 
 ### Changed
 
