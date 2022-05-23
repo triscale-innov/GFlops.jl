@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Updated CompatHelper setup
 - Updated compatibility bounds (#34, #36)
+- Support (and test) Julia LTS (v1.6) and latest version (v1)
 
 
 
