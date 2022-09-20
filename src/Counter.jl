@@ -42,10 +42,15 @@ function Base.show(io::IO, c::Counter)
 
     type_names = vcat(map(i-> type_names[i], cols_to_filter)...)
     row_labels = vcat(map(i-> row_labels[i], rows_to_filter)...)
+    row_label_kwargs = if pkgversion(PrettyTables) < v"2.0.0"
+        (; row_names = row_labels)
+    else
+        (; row_labels)
+    end
     print(io, "\n")
-    pretty_table(io, mat,
+    pretty_table(io, mat;
                  header = type_names,
-                 row_labels = row_labels,
+                 row_label_kwargs...,
                  newline_at_end = false)
 end
 
