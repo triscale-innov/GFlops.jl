@@ -21,24 +21,31 @@ import Base: ==, *, show
 function Base.show(io::IO, c::Counter)
     type_names  = [typ    for (typ, _)    in typs]
     type_suffix = [suffix for (_, suffix) in typs]
-    op_names    = [name   for (name, _)   in ops]
+    row_labels  = [name   for (name, _)   in ops]
 
     mat = [getfield(c, Symbol(name, suffix)) for
-           name   in op_names,
+           name   in row_labels,
            suffix in type_suffix]
+
+    fc(data, i) = any(data[:,i] .> 0)
+    fr(data, i) = any(data[i,:] .> 0)
+
+    # PrettyTables now data to be filtered ahead of time:
+    cols_to_filter = filter(i-> fc(mat, i), 1:size(mat, 2))
+    rows_to_filter = filter(i-> fr(mat, i), 1:size(mat, 1))
+    mat = hcat(map(i-> mat[:, i], cols_to_filter)...)
+    mat = vcat(map(i-> mat[i, :], rows_to_filter)...)
 
     fl = flop(c)
     print(io, "Flop Counter: $fl flop")
     fl == 0 && return
 
+    type_names = vcat(map(i-> type_names[i], cols_to_filter)...)
+    row_labels = vcat(map(i-> row_labels[i], rows_to_filter)...)
     print(io, "\n")
-    fc(data, i) = any(data[:,i] .> 0)
-    fr(data, i) = any(data[i,:] .> 0)
     pretty_table(io, mat,
                  header = type_names,
-                 row_names = op_names,
-                 filters_col = (fc,),
-                 filters_row = (fr,),
+                 row_labels = row_labels,
                  newline_at_end = false)
 end
 
