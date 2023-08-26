@@ -55,7 +55,7 @@ GFlops.times(::BenchmarkTools.Trial) = [2.0, 3.0]
                 x = rand(N)
                 y = similar(x)
 
-                cnt = @count_ops my_axpy!(a, x, y)
+                cnt = @show @count_ops my_axpy!(a, x, y)
                 @test cnt.add64 == N
                 @test cnt.mul64 == N
                 @test GFlops.flop(cnt) == 2*N
@@ -64,7 +64,7 @@ GFlops.times(::BenchmarkTools.Trial) = [2.0, 3.0]
                 m = rand(N, N)
                 v = rand(N)
 
-                cnt = @count_ops(my_prod(m, v))
+                cnt = @show @count_ops(my_prod(m, v))
                 @test cnt.add64 == N*N
                 @test cnt.mul64 == N*N
                 @test GFlops.flop(cnt) == 2*N*N
@@ -77,7 +77,7 @@ GFlops.times(::BenchmarkTools.Trial) = [2.0, 3.0]
                 x = rand(Float32, N)
                 y = similar(x)
 
-                cnt = @count_ops my_axpy!(a, x, y)
+                cnt = @show @count_ops my_axpy!(a, x, y)
                 @test cnt.add32 == N
                 @test cnt.mul32 == N
                 @test GFlops.flop(cnt) == 2*N
@@ -86,7 +86,7 @@ GFlops.times(::BenchmarkTools.Trial) = [2.0, 3.0]
                 m = rand(Float32, N, N)
                 v = rand(Float32, N)
 
-                cnt = @count_ops(my_prod(m, v))
+                cnt = @show @count_ops(my_prod(m, v))
                 @test cnt.add32 == N*N
                 @test cnt.mul32 == N*N
                 @test GFlops.flop(cnt) == 2*N*N
@@ -99,7 +99,7 @@ GFlops.times(::BenchmarkTools.Trial) = [2.0, 3.0]
                 x = rand(Float16, N)
                 y = similar(x)
 
-                cnt = @count_ops my_axpy!(a, x, y)
+                cnt = @show @count_ops my_axpy!(a, x, y)
                 @test cnt.add16 == N
                 @test cnt.mul16 == N
                 @test GFlops.flop(cnt) == 2*N
@@ -108,7 +108,7 @@ GFlops.times(::BenchmarkTools.Trial) = [2.0, 3.0]
                 m = rand(Float16, N, N)
                 v = rand(Float16, N)
 
-                cnt = @count_ops(my_prod(m, v))
+                cnt = @show @count_ops(my_prod(m, v))
                 @test cnt.add16 == N*N
                 @test cnt.mul16 == N*N
                 @test GFlops.flop(cnt) == 2*N*N
@@ -116,72 +116,77 @@ GFlops.times(::BenchmarkTools.Trial) = [2.0, 3.0]
         end
 
         @testset "neg" begin
-            let cnt = @count_ops -(4.2)
+            let cnt = @show @count_ops -(4.2)
                 @test cnt.neg64 == 1
                 @test GFlops.flop(cnt) == 1
             end
 
-            let cnt = @count_ops -(4.2f0)
+            let cnt = @show @count_ops -(4.2f0)
                 @test cnt.neg32 == 1
                 @test GFlops.flop(cnt) == 1
             end
         end
 
         @testset "abs" begin
-            let cnt = @count_ops abs(-4.2)
+            let cnt = @show @count_ops abs(-4.2)
                 @test cnt.abs64 == 1
                 @test GFlops.flop(cnt) == 1
             end
 
-            let cnt = @count_ops abs(-4.2f0)
+            let cnt = @show @count_ops abs(-4.2f0)
                 @test cnt.abs32 == 1
                 @test GFlops.flop(cnt) == 1
             end
         end
 
         @testset "sqrt" begin
-            let cnt = @count_ops sqrt(4.2)
+            let cnt = @show @count_ops sqrt(4.2)
                 @test cnt.sqrt64 == 1
                 @test GFlops.flop(cnt) == 1
             end
 
-            let cnt = @count_ops sqrt(4.2f0)
+            let cnt = @show @count_ops sqrt(4.2f0)
                 @test cnt.sqrt32 == 1
                 @test GFlops.flop(cnt) == 1
             end
         end
 
-        @testset "rem" begin
-            let cnt = @count_ops rem(12.0, 5.0)
-                @test cnt.rem64 == 1
-                @test GFlops.flop(cnt) == 1
-            end
+        # `rem` is a software implementation in Julia 1.9+
+        if VERSION < v"1.9"
+            @testset "rem" begin
+                let cnt = @show @count_ops rem(12.0, 5.0)
+                    @test cnt.rem64 == 1
+                    @test GFlops.flop(cnt) == 1
+                end
 
-            let cnt = @count_ops rem(12.0f0, 5.0f0)
-                @test cnt.rem32 == 1
-                @test GFlops.flop(cnt) == 1
+                let cnt = @show @count_ops rem(12.0f0, 5.0f0)
+                    @test cnt.rem32 == 1
+                    @test GFlops.flop(cnt) == 1
+                end
             end
         end
 
-        @testset "fma" begin
-            let cnt = @count_ops fma(1.0, 2.0, 3.0)
-                @test cnt.fma64 == 1
-                @test GFlops.flop(cnt) == 2
-            end
+        if !(Sys.isapple() && VERSION >= v"1.8")
+            @testset "fma" begin
+                let cnt = @show @count_ops fma(1.0, 2.0, 3.0)
+                    @test cnt.fma64 == 1
+                    @test GFlops.flop(cnt) == 2
+                end
 
-            let cnt = @count_ops fma(1.0f0, 2.0f0, 3.0f0)
-                @test cnt.fma32 == 1
-                @test GFlops.flop(cnt) == 2
+                let cnt = @show @count_ops fma(1.0f0, 2.0f0, 3.0f0)
+                    @test cnt.fma32 == 1
+                    @test GFlops.flop(cnt) == 2
+                end
             end
         end
 
         @testset "muladd" begin
-            let cnt = @count_ops muladd(1.0, 2.0, 3.0)
+            let cnt = @show @count_ops muladd(1.0, 2.0, 3.0)
                 @test cnt.muladd64 == 1
                 @test GFlops.flop(cnt) == 2
             end
 
-            let cnt = @count_ops muladd(1.0f0, 2.0f0, 3.0f0)
+            let cnt = @show @count_ops muladd(1.0f0, 2.0f0, 3.0f0)
                 @test cnt.muladd32 == 1
                 @test GFlops.flop(cnt) == 2
             end
@@ -191,13 +196,13 @@ GFlops.times(::BenchmarkTools.Trial) = [2.0, 3.0]
             let N = 100
 
                 T = Float64
-                cnt = @count_ops my_axpy!(pi, $(rand(T, N)), $(rand(T, N)))
+                cnt = @show @count_ops my_axpy!(pi, $(rand(T, N)), $(rand(T, N)))
                 @test cnt.add64 == N
                 @test cnt.mul64 == N
                 @test GFlops.flop(cnt) == 2*N
 
                 T = Float32
-                cnt = @count_ops my_axpy!(pi, $(rand(T, N)), $(rand(T, N)))
+                cnt = @show @count_ops my_axpy!(pi, $(rand(T, N)), $(rand(T, N)))
                 @test cnt.add32 == N
                 @test cnt.mul32 == N
                 @test GFlops.flop(cnt) == 2*N
@@ -208,14 +213,14 @@ GFlops.times(::BenchmarkTools.Trial) = [2.0, 3.0]
             let N = 100
 
                 x = 42.0
-                cnt1 = @count_ops sin(x)
-                cnt2 = @count_ops sin.($(fill(x, N)))
+                cnt1 = @show @count_ops sin(x)
+                cnt2 = @show @count_ops sin.($(fill(x, N)))
                 @test GFlops.flop(cnt1) != 0
                 @test cnt2 == N*cnt1
 
                 x = 42.0f0
-                cnt1 = @count_ops sin(x)
-                cnt2 = @count_ops sin.($(fill(x, N)))
+                cnt1 = @show @count_ops sin(x)
+                cnt2 = @show @count_ops sin.($(fill(x, N)))
                 @test GFlops.flop(cnt1) != 0
                 @test cnt2 == N*cnt1
             end
