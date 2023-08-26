@@ -46,6 +46,22 @@ GFlops.times(::BenchmarkTools.Trial) = [2.0, 3.0]
                 @test  occursin(" 1 ",     str)
             end
         end
+
+        @testset "display mixed" begin
+            let
+                cnt = GFlops.Counter()
+                cnt.add32 = 1
+                cnt.mul64 = 2
+                str = string(cnt)
+                @test  occursin("Float32", str)
+                @test  occursin("Float64", str)
+                @test  occursin("add",     str)
+                @test  occursin("mul",     str)
+                @test !occursin("div",     str)
+                @test  occursin(" 1 ",     str)
+                @test  occursin(" 2 ",     str)
+            end
+        end
     end
 
     @testset "@count_ops" begin

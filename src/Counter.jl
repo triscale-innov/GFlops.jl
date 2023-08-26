@@ -19,38 +19,27 @@ end
 import Base: ==, *, show
 
 function Base.show(io::IO, c::Counter)
-    type_names  = [typ    for (typ, _)    in typs]
-    type_suffix = [suffix for (_, suffix) in typs]
-    row_labels  = [name   for (name, _)   in ops]
-
-    mat = [getfield(c, Symbol(name, suffix)) for
-           name   in row_labels,
-           suffix in type_suffix]
-
-    fc(data, i) = any(data[:,i] .> 0)
-    fr(data, i) = any(data[i,:] .> 0)
-
-    # PrettyTables now data to be filtered ahead of time:
-    cols_to_filter = filter(i-> fc(mat, i), 1:size(mat, 2))
-    rows_to_filter = filter(i-> fr(mat, i), 1:size(mat, 1))
-    mat = hcat(map(i-> mat[:, i], cols_to_filter)...)
-    mat = vcat(map(i-> mat[i, :], rows_to_filter)...)
-
     fl = flop(c)
     print(io, "Flop Counter: $fl flop")
     fl == 0 && return
 
-    type_names = vcat(map(i-> type_names[i], cols_to_filter)...)
-    row_labels = vcat(map(i-> row_labels[i], rows_to_filter)...)
-    row_label_kwargs = if pkgversion(PrettyTables) < v"2.0.0"
-        (; row_names = row_labels)
-    else
-        (; row_labels)
-    end
+    type_names  = [typ    for (typ, _)    in typs]
+    type_suffix = [suffix for (_, suffix) in typs]
+    op_names    = [name   for (name, _)   in ops]
+
+    mat = [getfield(c, Symbol(name, suffix)) for
+           name   in op_names,
+           suffix in type_suffix]
+
+    # PrettyTables now needs data to be filtered ahead of time:
+    rows = filter(i -> any(mat[i,:] .> 0), 1:size(mat, 1))
+    cols = filter(i -> any(mat[:,i] .> 0), 1:size(mat, 2))
+    mat = mat[rows, cols]
+
     print(io, "\n")
     pretty_table(io, mat;
-                 header = type_names,
-                 row_label_kwargs...,
+                 header = type_names[cols],
+                 row_labels = op_names[rows],
                  newline_at_end = false)
 end
 
