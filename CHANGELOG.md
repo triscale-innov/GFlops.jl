@@ -3,8 +3,15 @@
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [0.1.7] - UNRELEASED
+## [0.1.7] - 2023-08-27
 
+### Changed
+
+- Updated CompatHelper setup
+- Fixed CI (#44)
+  - `rem` has a pure-julia software implementation since Julia 1.9 (#42)
+  - `fma` seems to be implemented in software on MacOS since Julia 1.8 (#45)
+- Updated to PrettyTables v2 (#41, #46)
 
 
 ## [0.1.6] - 2022-05-23
