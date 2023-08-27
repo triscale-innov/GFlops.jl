@@ -19,6 +19,10 @@ end
 import Base: ==, *, show
 
 function Base.show(io::IO, c::Counter)
+    fl = flop(c)
+    print(io, "Flop Counter: $fl flop")
+    fl == 0 && return
+
     type_names  = [typ    for (typ, _)    in typs]
     type_suffix = [suffix for (_, suffix) in typs]
     op_names    = [name   for (name, _)   in ops]
@@ -27,18 +31,15 @@ function Base.show(io::IO, c::Counter)
            name   in op_names,
            suffix in type_suffix]
 
-    fl = flop(c)
-    print(io, "Flop Counter: $fl flop")
-    fl == 0 && return
+    # PrettyTables now needs data to be filtered ahead of time:
+    rows = filter(i -> any(mat[i,:] .> 0), 1:size(mat, 1))
+    cols = filter(i -> any(mat[:,i] .> 0), 1:size(mat, 2))
+    mat = mat[rows, cols]
 
     print(io, "\n")
-    fc(data, i) = any(data[:,i] .> 0)
-    fr(data, i) = any(data[i,:] .> 0)
-    pretty_table(io, mat,
-                 header = type_names,
-                 row_names = op_names,
-                 filters_col = (fc,),
-                 filters_row = (fr,),
+    pretty_table(io, mat;
+                 header = type_names[cols],
+                 row_labels = op_names[rows],
                  newline_at_end = false)
 end
 
