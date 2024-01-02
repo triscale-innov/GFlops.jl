@@ -12,7 +12,7 @@ const binops = (
     (:sub, Core.Intrinsics.sub_float, 1),
     (:mul, Core.Intrinsics.mul_float, 1),
     (:div, Core.Intrinsics.div_float, 1),
-    (:rem, Core.Intrinsics.rem_float, 1),
+    (VERSION < v"1.10" ? ((:rem, Core.Intrinsics.rem_float, 1),) : () )...,
 )
 
 const unops = (
